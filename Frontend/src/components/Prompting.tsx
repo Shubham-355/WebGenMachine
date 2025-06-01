@@ -2,21 +2,60 @@ import { useNavigate } from 'react-router-dom';
 import { Boxes } from './ui/background-boxes';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronRight, Hammer } from 'lucide-react';
+import { ChevronRight, Hammer, Upload, X } from 'lucide-react';
+import axios from 'axios';
+import { useLoad } from '../state/LoadContext';
 
 const Prompting = () => {
     const navigate = useNavigate();
     const [prompt, setPrompt] = useState('');
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const { setIsLoaded } = useLoad();
     
-    // useEffect(() => {
-    //     setIsLoaded(true);
-    // }, []);
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImagePreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+    };
     
-    const handleCreateClick = () => {
-        console.log('hello');
-        navigate('/magic');
-        window.location.href = '/magic';
+    const handleCreateClick = async () => {
+        if (!prompt.trim() && !selectedImage) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('prompt', prompt.trim());
+            if (selectedImage) {
+                formData.append('image', selectedImage);
+            }
+
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/generate`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            
+            const { steps, basefiles } = response.data;
+            setIsLoaded(true);
+            console.log('hello');
+            navigate('/magic', {state: {steps, basefiles, prompt}});
+            window.location.href = '/magic';
+            setIsLoaded(false);
+        } catch (error) {
+            console.error('Error generating content:', error);
+            alert('Failed to generate content. Please try again.');
+        }
     };
     
     return (
@@ -41,8 +80,32 @@ const Prompting = () => {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5, duration: 0.8 }}
                     >
-                        Describe your website and watch it come to life
+                        Describe your website or upload an image for reference
                     </motion.p>
+                    
+                    {/* Image Upload Section */}
+                    {imagePreview && (
+                        <motion.div 
+                            className="relative w-full mb-4"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <div className="relative bg-black/40 border border-gray-700/70 rounded-lg p-3">
+                                <img 
+                                    src={imagePreview} 
+                                    alt="Preview" 
+                                    className="w-full h-32 object-cover rounded-md"
+                                />
+                                <button
+                                    onClick={removeImage}
+                                    className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-500 text-white rounded-full p-1 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
                     
                     <div className="flex space-x-3 w-full">
                         <motion.div
@@ -69,6 +132,29 @@ const Prompting = () => {
                                 </button>
                             )}
                         </motion.div>
+                        
+                        {/* Image Upload Button */}
+                        <motion.label 
+                            className="px-4 py-4 text-gray-200 bg-black/80 border border-gray-700/80
+                                    rounded-lg shadow-lg hover:shadow-blue-900/2 
+                                    transition-all duration-300 font-medium flex items-center justify-center
+                                    min-w-[52px] aspect-square cursor-pointer"
+                            whileHover={{ 
+                                scale: 1.05, 
+                                background: "#1f2937",
+                                color: "#60a5fa"
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <Upload className="w-5 h-5" />
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleImageUpload}
+                                className="hidden"
+                            />
+                        </motion.label>
+                        
                         <motion.button 
                             className="px-4 py-4 text-gray-200 bg-black/80 border border-gray-700/80
                                     rounded-lg shadow-lg hover:shadow-blue-900/2 
