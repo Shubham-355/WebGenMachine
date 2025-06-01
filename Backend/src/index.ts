@@ -10,8 +10,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'];
 
-app.use(cors());
+app.use(cors({
+  origin: ALLOWED_ORIGINS,
+  credentials: true
+}));
 app.use(express.json());
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY as string });
@@ -59,7 +63,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     // Generate content using the Gemini API
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.0-flash-exp",
       contents: [
         {
           role: "user",

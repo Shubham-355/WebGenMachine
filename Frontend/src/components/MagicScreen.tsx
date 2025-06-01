@@ -82,13 +82,13 @@ const MagicScreen = () => {
 
   return (
     <div className="flex h-[99%] bg-black">
-      <div className="w-1/7 p-4 border-r border-gray-300">
+      <div className="w-1/7 p-4 border-r border-gray-800">
         <div className="text-xl font-bold mb-4">
           <PromptStatus prompt={prompt || "Failed to load Prompt"} />
         </div>
       </div>
 
-      <div className="w-1/8 p-4 border-r border-gray-300">
+      <div className="w-1/8 p-1 border-r border-gray-800">
         <div className="text-lg text-gray-700">
           <FileStructure files={parsedFiles} onFileSelect={setSelectedFile} />
         </div>
@@ -97,36 +97,70 @@ const MagicScreen = () => {
       <div className="flex-1 p-4 flex flex-col">
         <div className="mb-4">
           <div className="flex space-x-2">
+            {/* Preview Button */}
             <button 
-              className={`relative inline-flex h-10 overflow-hidden rounded-lg p-[1px] focus:outline-none focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 ${selectedComponent === "Preview" ? "" : "border border-gray-600"}`}
+              className={`group relative px-4 py-2 rounded-lg font-medium text-xs transition-all duration-300 overflow-hidden ${
+                selectedComponent === "Preview" 
+                  ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/50 text-blue-300 shadow-lg shadow-blue-500/25" 
+                  : "bg-black/60 border border-gray-700/70 text-gray-300 hover:border-gray-600/80 hover:bg-gray-900/60"
+              }`}
               onClick={() => setSelectedComponent("Preview")}
             >
               {selectedComponent === "Preview" && (
-                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10 animate-pulse" />
               )}
-              <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white backdrop-blur-3xl">
-                Preview
-              </span>
+              <div className="relative flex items-center space-x-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  selectedComponent === "Preview" 
+                    ? "bg-blue-400 shadow-lg shadow-blue-400/50" 
+                    : "bg-gray-500 group-hover:bg-gray-400"
+                }`} />
+                <span className="font-['Space_Grotesk'] tracking-wide">Preview</span>
+              </div>
+              {selectedComponent === "Preview" && (
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-blue-600/30 rounded-lg blur opacity-30 -z-10" />
+              )}
             </button>
+
+            {/* Code Button */}
             <button 
-              className={`relative inline-flex h-10 overflow-hidden rounded-lg p-[1px] focus:outline-none focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 ${selectedComponent === "CodeComponent" ? "" : "border border-gray-600"}`}
+              className={`group relative px-4 py-2 rounded-lg font-medium text-xs transition-all duration-300 overflow-hidden ${
+                selectedComponent === "CodeComponent" 
+                  ? "bg-gradient-to-r from-emerald-600/20 to-cyan-600/20 border border-emerald-500/50 text-emerald-300 shadow-lg shadow-emerald-500/25" 
+                  : "bg-black/60 border border-gray-700/70 text-gray-300 hover:border-gray-600/80 hover:bg-gray-900/60"
+              }`}
               onClick={() => setSelectedComponent("CodeComponent")}
             >
               {selectedComponent === "CodeComponent" && (
-                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 via-cyan-600/10 to-emerald-600/10 animate-pulse" />
               )}
-              <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white backdrop-blur-3xl">
-                Code
-              </span>
+              <div className="relative flex items-center space-x-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  selectedComponent === "CodeComponent" 
+                    ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" 
+                    : "bg-gray-500 group-hover:bg-gray-400"
+                }`} />
+                <span className="font-['Space_Grotesk'] tracking-wide">Code</span>
+              </div>
+              {selectedComponent === "CodeComponent" && (
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600/30 via-cyan-600/30 to-emerald-600/30 rounded-lg blur opacity-30 -z-10" />
+              )}
             </button>
+
+            {/* Refresh Button - Only visible when Preview is selected */}
             {selectedComponent === "Preview" && (
               <button 
-                className="relative inline-flex h-10 overflow-hidden rounded-lg p-[1px] focus:outline-none focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 border border-gray-600"
+                className="group relative px-3 py-2 rounded-lg font-medium text-xs transition-all duration-300 overflow-hidden
+                         bg-black/60 border border-gray-700/70 text-gray-300 hover:border-orange-500/60 hover:bg-orange-900/20 hover:text-orange-300"
                 onClick={() => previewRef.current?.refreshPreview()}
               >
-                <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white backdrop-blur-3xl">
-                  Refresh
-                </span>
+                <div className="relative flex items-center space-x-1.5">
+                  <svg className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span className="font-['Space_Grotesk'] tracking-wide">Refresh</span>
+                </div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-lg blur opacity-0 group-hover:opacity-30 transition-opacity duration-300 -z-10" />
               </button>
             )}
           </div>

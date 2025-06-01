@@ -5,11 +5,11 @@ const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOver
   
   // Define the processing steps that match what's happening in preview
   const processingSteps = [
-    { id: 1, name: "Analyzing Requirements", description: "Processing your request" },
-    { id: 2, name: "Generating Project Structure", description: "Creating file architecture" },
-    { id: 3, name: "Writing Components", description: "Building React components" },
-    { id: 4, name: "Styling Application", description: "Applying CSS and design" },
-    { id: 5, name: "Final Assembly", description: "Putting everything together" }
+    { id: 1, name: "Analyzing Requirements", icon: "🔍" },
+    { id: 2, name: "Generating Project Structure", icon: "🏗️" },
+    { id: 3, name: "Writing Components", icon: "⚛️" },
+    { id: 4, name: "Styling Application", icon: "🎨" },
+    { id: 5, name: "Final Assembly", icon: "🔧" }
   ];
 
   const getStepStatus = (stepId: number) => {
@@ -18,21 +18,10 @@ const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOver
     return 'pending';
   };
 
-  const getStepIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '✓';
-      case 'current':
-        return '⟳';
-      default:
-        return '○';
-    }
-  };
-
   const getStepColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'text-green-400';
+        return 'text-emerald-400';
       case 'current':
         return 'text-blue-400';
       default:
@@ -41,42 +30,135 @@ const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOver
   };
   
   return (
-    <div className="space-y-4 h-full flex flex-col">
-      {/* Project Overview - Compact */}
+    <div className="space-y-3 h-full flex flex-col font-['Inter'] text-xs">
+      {/* Project Overview - Redesigned */}
       <div className="flex-shrink-0">
-       
-        <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-1 border border-gray-600">
-          <div className="flex-1 min-w-0">
-            <p className="text-gray-200 text-sm leading-tight font-medium line-clamp-2">
-                {projectOverview || "Generating a comprehensive web application based on your requirements."}
-            </p>
+        <div className="relative group">
+          {/* Subtle border glow effect */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 rounded-lg blur opacity-60 group-hover:opacity-80 transition duration-300"></div>
+          
+          {/* Main content container */}
+          <div className="relative bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-2 hover:border-gray-600/60 transition-all duration-300">
+            {/* Header with icon */}
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+              <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider font-['JetBrains_Mono']">
+                Active Prompt
+              </span>
             </div>
+            
+            {/* Prompt text */}
+            <div className="relative">
+              <p className="text-gray-100 text-xs leading-tight font-medium tracking-wide line-clamp-2 pr-2">
+                {prompt || "No prompt provided"}
+              </p>
+              
+              {/* Subtle fade overlay for long text */}
+              <div className="absolute bottom-0 right-0 w-6 h-4 bg-gradient-to-l from-gray-900/80 to-transparent pointer-events-none"></div>
+            </div>
+            
+            {/* Bottom accent line */}
+            <div className="mt-2 pt-2 border-t border-gray-800/60">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-gray-500 font-['JetBrains_Mono'] tracking-wider">
+                  PROCESSING
+                </span>
+                <div className="flex space-x-0.5">
+                  <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-pulse delay-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
-      {/* Generation Progress - Flexible */}
+      {/* Generation Progress - Redesigned */}
       <div className="flex-1 min-h-0 flex flex-col">
-        <h3 className="text-xs font-medium text-gray-400 mb-2 flex-shrink-0">Generation Progress</h3>
-        <div className="space-y-2 flex-1 overflow-y-auto">
-          {processingSteps.map((step) => {
+        <div className="relative group mb-3">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600/15 via-blue-600/15 to-purple-600/15 rounded-lg blur opacity-40 group-hover:opacity-60 transition duration-300"></div>
+          
+          <div className="relative bg-gray-900/60 backdrop-blur-sm border border-gray-700/40 rounded-lg p-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
+              <h3 className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider font-['JetBrains_Mono']">
+                Generation Progress
+              </h3>
+            </div>
+            
+            {/* Progress overview */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-gray-400">Step {currentStep} of {totalSteps}</span>
+              <span className={`text-[10px] font-medium ${isLoaded ? 'text-emerald-400' : 'text-blue-400'}`}>
+                {Math.round((currentStep / totalSteps) * 100)}%
+              </span>
+            </div>
+            
+            {/* Enhanced progress bar */}
+            <div className="w-full bg-gray-800/60 rounded-full h-1.5 mb-1 overflow-hidden">
+              <div 
+                className={`h-1.5 rounded-full transition-all duration-500 ease-out relative ${
+                  isLoaded ? 'bg-gradient-to-r from-emerald-400 to-emerald-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                }`}
+                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              >
+                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Steps list */}
+        <div className="space-y-2 flex-1">
+          {processingSteps.map((step, index) => {
             const status = getStepStatus(step.id);
             return (
-              <div key={step.id} className="flex items-center space-x-2">
-                <div className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center text-[10px] font-bold ${
+              <div key={step.id} className="relative group">
+                <div className={`absolute -inset-0.5 rounded-lg blur opacity-0 transition duration-300 ${
+                  status === 'current' ? 'bg-blue-600/20 opacity-60' : 
+                  status === 'completed' ? 'bg-emerald-600/20 group-hover:opacity-40' : ''
+                }`}></div>
+                
+                <div className={`relative bg-gray-900/40 backdrop-blur-sm border rounded-lg p-2 transition-all duration-300 ${
                   status === 'completed' 
-                    ? 'bg-green-400 border-green-400 text-gray-900' 
+                    ? 'border-emerald-600/30 hover:border-emerald-600/50' 
                     : status === 'current'
-                    ? 'border-blue-400 text-blue-400 bg-gray-800'
-                    : 'border-gray-600 text-gray-600 bg-gray-800'
+                    ? 'border-blue-600/50 shadow-lg shadow-blue-600/10'
+                    : 'border-gray-700/30 hover:border-gray-600/40'
                 }`}>
-                  {getStepIcon(status)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className={`text-xs font-medium ${getStepColor(status)} truncate`}>
-                    {step.name}
-                  </div>
-                  <div className="text-[10px] text-gray-500 truncate">
-                    {step.description}
+                  <div className="flex items-center space-x-2">
+                    {/* Step indicator */}
+                    <div className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center text-[8px] font-bold transition-all duration-300 ${
+                      status === 'completed' 
+                        ? 'bg-emerald-400 border-emerald-400 text-gray-900 shadow-lg shadow-emerald-400/30' 
+                        : status === 'current'
+                        ? 'border-blue-400 text-blue-400 bg-gray-800 shadow-lg shadow-blue-400/20 animate-pulse'
+                        : 'border-gray-600/60 text-gray-600 bg-gray-800/50'
+                    }`}>
+                      {status === 'completed' ? '✓' : status === 'current' ? step.icon : step.id}
+                    </div>
+                    
+                    {/* Step content */}
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-[10px] font-semibold transition-colors duration-300 ${getStepColor(status)}`}>
+                        {step.name}
+                      </div>
+                      
+                      {/* Current step indicator */}
+                      {status === 'current' && (
+                        <div className="mt-1 flex items-center space-x-1">
+                          <div className="flex space-x-0.5">
+                            <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-bounce"></div>
+                            <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-bounce delay-100"></div>
+                            <div className="w-0.5 h-0.5 bg-blue-400 rounded-full animate-bounce delay-200"></div>
+                          </div>
+                          <span className="text-[8px] text-blue-400 font-medium font-['JetBrains_Mono'] tracking-wider">
+                            IN PROGRESS
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -84,25 +166,24 @@ const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOver
           })}
         </div>
         
-        {/* Progress Bar - Compact */}
-        <div className="mt-3 pt-2 border-t border-gray-700 flex-shrink-0">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="text-gray-500">Progress:</span>
-            <span className="text-gray-300">{currentStep}/{totalSteps}</span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-1.5">
-            <div 
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                isLoaded ? 'bg-green-400' : 'bg-blue-400'
-              }`}
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            ></div>
-          </div>
-          <div className="flex items-center justify-between text-[10px] mt-1">
-            <span className="text-gray-500">Status:</span>
-            <span className={`font-medium ${isLoaded ? 'text-green-400' : 'text-blue-400'}`}>
-              {isLoaded ? '✓ Complete' : '⟳ Processing'}
-            </span>
+        {/* Status footer */}
+        <div className="mt-2 pt-2 border-t border-gray-700/40 flex-shrink-0">
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600/10 via-gray-500/10 to-gray-600/10 rounded-lg blur opacity-40"></div>
+            
+            <div className="relative bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-lg p-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  <span className="text-[9px] text-gray-500 font-['JetBrains_Mono'] tracking-wider">
+                    STATUS
+                  </span>
+                  <div className={`w-1 h-1 rounded-full ${isLoaded ? 'bg-emerald-400' : 'bg-blue-400 animate-pulse'}`}></div>
+                </div>
+                <span className={`font-semibold text-[10px] ${isLoaded ? 'text-emerald-400' : 'text-blue-400'}`}>
+                  {isLoaded ? '✓ Complete' : '⟳ Generating...'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

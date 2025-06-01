@@ -119,17 +119,23 @@ const Preview = forwardRef(({ parsedFiles, isProcessing }: { parsedFiles: any[],
   const setupProject = async () => {
     if (!webcontainer || isInstalling) return;
 
-    console.log('Starting project setup...');
+    console.log('Starting project setup with files:', parsedFiles.length);
 
     try {
       setIsInstalling(true);
       setInstallProgress('Setting up files...');
       setError(null);
 
+      // Add validation
+      if (parsedFiles.length === 0) {
+        throw new Error('No files to setup. Make sure the generation was successful.');
+      }
+
       // Convert parsed files to WebContainer file structure
       const fileStructure: any = {};
       
-      parsedFiles.forEach(file => {
+      parsedFiles.forEach((file, index) => {
+        console.log(`Processing file ${index + 1}:`, file.path);
         const pathParts = file.path.replace(/^\//, '').split('/').filter((part: string) => part !== '');
         let current = fileStructure;
         
@@ -150,7 +156,7 @@ const Preview = forwardRef(({ parsedFiles, isProcessing }: { parsedFiles: any[],
         };
       });
 
-      console.log('File structure to mount:', fileStructure);
+      console.log('File structure to mount:', Object.keys(fileStructure));
       await webcontainer.mount(fileStructure);
       console.log('Files mounted successfully');
 
@@ -159,12 +165,16 @@ const Preview = forwardRef(({ parsedFiles, isProcessing }: { parsedFiles: any[],
       const hasViteConfig = parsedFiles.some(file => file.name.includes('vite.config'));
       const hasIndexHtml = parsedFiles.some(file => file.name === 'index.html');
       
+      console.log('Project analysis:', { hasPackageJson, hasViteConfig, hasIndexHtml });
+      
       // Detect if Tailwind CSS is being used
       const usesTailwind = parsedFiles.some(file => 
         file.content?.includes('tailwind') || 
         file.content?.includes('class="') ||
         file.content?.includes('className="')
       );
+
+      console.log('Uses Tailwind:', usesTailwind);
 
       // Add essential files if missing
       if (hasPackageJson && !hasViteConfig) {
