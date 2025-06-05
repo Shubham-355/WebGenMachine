@@ -1,6 +1,6 @@
 import { useLoad } from '../state/LoadContext';
 
-const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOverview?: string }) => {
+const PromptStatus = ({ prompt }: { prompt: string }) => {
   const { currentStep, totalSteps, isLoaded } = useLoad();
   
   // Define the processing steps that match what's happening in preview
@@ -111,7 +111,7 @@ const PromptStatus = ({ prompt, projectOverview }: { prompt: string, projectOver
         
         {/* Steps list */}
         <div className="space-y-2 flex-1">
-          {processingSteps.map((step, index) => {
+          {processingSteps.map((step) => {
             const status = getStepStatus(step.id);
             return (
               <div key={step.id} className="relative group">

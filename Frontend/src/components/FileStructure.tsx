@@ -28,51 +28,37 @@ const FileStructure = ({ files, onFileSelect }: { files: any[], onFileSelect: (f
   }
 
   const buildFileTree = (files: any[]): FileNode[] => {
-    const root: { [key: string]: FileNode } = {};
-    
-    // First, create the basic project structure
-    const createFolder = (path: string, name: string) => {
-      if (!root[name]) {
-        root[name] = {
-          name: name,
-          type: 'folder',
-          path: path,
-          children: {}
-        };
-      }
-    };
+    const folderMap = new Map<string, FileNode>();
+    const rootNodes: FileNode[] = [];
 
-    // Create default folders
-    createFolder('src', 'src');
-    createFolder('src/components', 'components');
-    createFolder('src/pages', 'pages');
-    createFolder('src/styles', 'styles');
-    createFolder('src/utils', 'utils');
-    createFolder('src/hooks', 'hooks');
-    createFolder('src/assets', 'assets');
-    createFolder('public', 'public');
-    
+    // Process each file
     files.forEach(file => {
-      // Clean and normalize the file path
       let normalizedPath = file.name || file.path || '';
+      normalizedPath = normalizedPath.replace(/^[\/\\]+/, '').replace(/\\/g, '/').replace(/\/+/g, '/');
       
-      // Remove leading slashes and backslashes
-      normalizedPath = normalizedPath.replace(/^[\/\\]+/, '');
-      
-      // Convert backslashes to forward slashes
-      normalizedPath = normalizedPath.replace(/\\/g, '/');
-      
-      // Remove duplicate slashes
-      normalizedPath = normalizedPath.replace(/\/+/g, '/');
-      
-      // If the file doesn't have a path structure, organize it by file type
+      // Smart categorization for files without folder structure
       if (!normalizedPath.includes('/')) {
+        const fileName = normalizedPath.toLowerCase();
         const ext = normalizedPath.split('.').pop()?.toLowerCase();
         
-        // Organize files into appropriate folders based on extension
-        if (['tsx', 'jsx'].includes(ext || '')) {
+        // Keep certain files at root level
+        const rootLevelFiles = [
+          'package.json', 'package-lock.json', 'yarn.lock',
+          'readme.md', 'readme.txt', 'license', 'license.md',
+          'gitignore', '.gitignore', '.env', '.env.local',
+          'dockerfile', 'docker-compose.yml', 'docker-compose.yaml',
+          'tsconfig.json', 'jsconfig.json', 'webpack.config.js',
+          'vite.config.js', 'vite.config.ts', 'next.config.js',
+          'tailwind.config.js', 'tailwind.config.ts',
+          'eslint.config.js', '.eslintrc.js', '.eslintrc.json',
+          'prettier.config.js', '.prettierrc'
+        ];
+        
+        if (rootLevelFiles.some(rootFile => fileName.includes(rootFile.toLowerCase()))) {
+          // Keep at root level
+        } else if (['tsx', 'jsx'].includes(ext || '')) {
           normalizedPath = `src/components/${normalizedPath}`;
-        } else if (['ts', 'js'].includes(ext || '') && !normalizedPath.includes('config')) {
+        } else if (['ts', 'js'].includes(ext || '') && !fileName.includes('config')) {
           normalizedPath = `src/utils/${normalizedPath}`;
         } else if (['css', 'scss', 'sass'].includes(ext || '')) {
           normalizedPath = `src/styles/${normalizedPath}`;
@@ -80,105 +66,75 @@ const FileStructure = ({ files, onFileSelect }: { files: any[], onFileSelect: (f
           normalizedPath = `src/assets/${normalizedPath}`;
         } else if (['html'].includes(ext || '')) {
           normalizedPath = `public/${normalizedPath}`;
-        } else {
-          normalizedPath = `src/${normalizedPath}`;
+        }
+        // Note: removed the fallback that put everything in src/
+      }
+
+      const parts = normalizedPath.split('/').filter((part: string) => part.trim() !== '');
+      
+      // Create folder structure
+      let currentPath = '';
+      for (let i = 0; i < parts.length - 1; i++) {
+        const folderName = parts[i];
+        const parentPath = currentPath;
+        currentPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+        
+        if (!folderMap.has(currentPath)) {
+          const folderNode: FileNode = {
+            name: folderName,
+            type: 'folder',
+            path: currentPath,
+            children: []
+          };
+          folderMap.set(currentPath, folderNode);
+          
+          // Add to parent or root
+          if (parentPath && folderMap.has(parentPath)) {
+            folderMap.get(parentPath)!.children!.push(folderNode);
+          } else if (!parentPath) {
+            rootNodes.push(folderNode);
+          }
         }
       }
       
-      // Split path into parts and filter out empty strings
-      const parts = normalizedPath.split('/').filter(part => part.trim() !== '');
+      // Create file node
+      const fileName = parts[parts.length - 1];
+      const fileNode: FileNode = {
+        name: fileName,
+        type: 'file',
+        path: normalizedPath,
+        file: file
+      };
       
-      if (parts.length === 0) return; // Skip invalid paths
-      
-      let currentPath = '';
-      let currentLevel = root;
-      
-      parts.forEach((part, index) => {
-        // Build the current path
-        currentPath = currentPath ? `${currentPath}/${part}` : part;
-        const isFile = index === parts.length - 1;
-        
-        // Create node if it doesn't exist
-        if (!currentLevel[part]) {
-          currentLevel[part] = {
-            name: part,
-            type: isFile ? 'file' : 'folder',
-            path: currentPath,
-            children: isFile ? undefined : {},
-            file: isFile ? file : undefined
-          };
+      // Add file to appropriate parent
+      if (parts.length === 1) {
+        rootNodes.push(fileNode);
+      } else {
+        const parentFolderPath = parts.slice(0, -1).join('/');
+        const parentFolder = folderMap.get(parentFolderPath);
+        if (parentFolder && parentFolder.children) {
+          parentFolder.children.push(fileNode);
         }
-        
-        // Move deeper into the structure for folders
-        if (!isFile && currentLevel[part].children) {
-          currentLevel = currentLevel[part].children as { [key: string]: FileNode };
-        }
-      });
+      }
     });
 
-    // Remove empty folders
-    const removeEmptyFolders = (nodeObj: { [key: string]: FileNode }): { [key: string]: FileNode } => {
-      const result: { [key: string]: FileNode } = {};
-      
-      Object.entries(nodeObj).forEach(([key, node]) => {
-        if (node.type === 'file') {
-          result[key] = node;
-        } else if (node.children) {
-          const cleanedChildren = removeEmptyFolders(node.children as { [key: string]: FileNode });
-          if (Object.keys(cleanedChildren).length > 0) {
-            result[key] = {
-              ...node,
-              children: cleanedChildren
-            };
-          }
-        }
-      });
-      
-      return result;
-    };
-
-    const cleanedRoot = removeEmptyFolders(root);
-
-    // Convert nested object structure to array structure
-    const convertToArray = (nodeObj: { [key: string]: FileNode }): FileNode[] => {
-      return Object.values(nodeObj).map(node => ({
-        ...node,
-        children: node.children ? convertToArray(node.children as { [key: string]: FileNode }) : undefined
-      })).sort((a, b) => {
-        // First sort by type (folders before files)
+    // Sort function
+    const sortNodes = (nodes: FileNode[]): FileNode[] => {
+      return nodes.sort((a, b) => {
+        // Folders first, then files
         if (a.type !== b.type) {
           return a.type === 'folder' ? -1 : 1;
         }
-        
-        // Then sort alphabetically, but prioritize common folders
-        const folderPriority: { [key: string]: number } = {
-          'src': 1,
-          'public': 2,
-          'components': 3,
-          'pages': 4,
-          'styles': 5,
-          'assets': 6,
-          'utils': 7,
-          'hooks': 8,
-          'lib': 9,
-          'types': 10,
-          'config': 11
-        };
-        
-        if (a.type === 'folder' && b.type === 'folder') {
-          const aPriority = folderPriority[a.name.toLowerCase()] || 999;
-          const bPriority = folderPriority[b.name.toLowerCase()] || 999;
-          
-          if (aPriority !== bPriority) {
-            return aPriority - bPriority;
-          }
+        return a.name.localeCompare(b.name);
+      }).map(node => {
+        if (node.type === 'folder' && node.children) {
+          node.children = sortNodes(node.children);
         }
-        
-        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        return node;
       });
     };
 
-    return convertToArray(cleanedRoot);
+    return sortNodes(rootNodes);
   };
 
   const toggleFolder = (path: string) => {
@@ -193,7 +149,6 @@ const FileStructure = ({ files, onFileSelect }: { files: any[], onFileSelect: (f
 
   const FileTreeNode = ({ node, depth = 0 }: { node: FileNode; depth?: number }) => {
     const isExpanded = expandedFolders.has(node.path);
-    const paddingLeft = depth * 16; // Reduced for better spacing
 
     const getFileIcon = (fileName: string) => {
       const ext = fileName.split('.').pop()?.toLowerCase();

@@ -291,7 +291,7 @@ export default defineConfig({
       }
 
       // Set up server-ready listener before starting the server
-      webcontainer.on('server-ready', (port, serverUrl) => {
+      webcontainer.on('server-ready', (_, serverUrl) => {
         console.log('Server ready on:', serverUrl);
         if (componentMountedRef.current) {
           setUrl(serverUrl);

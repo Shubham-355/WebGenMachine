@@ -28,7 +28,8 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const userprompt = req.body.prompt;
     
     if (!userprompt) {
-      return res.status(400).json({ error: 'Prompt is required' });
+      res.status(400).json({ error: 'Prompt is required' });
+      return;
     }
     
     const systemPrompt = getSystemPrompt();
@@ -63,7 +64,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     // Generate content using the Gemini API
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.0-flash",
       contents: [
         {
           role: "user",
@@ -80,13 +81,13 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     const generatedText = response.text || '';
     console.log('Generated text:', generatedText);
     
-    return res.status(200).json({
+    res.status(200).json({
       steps: generatedText, basefiles: defaultPrompt
     });
     
   } catch (error) {
     console.error('Error generating website:', error);
-    return res.status(500).json({ 
+    res.status(500).json({ 
       error: 'Failed to generate website',
       details: error instanceof Error ? error.message : String(error)
     });

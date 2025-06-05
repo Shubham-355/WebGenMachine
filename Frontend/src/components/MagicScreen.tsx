@@ -14,7 +14,7 @@ const MagicScreen = () => {
   const previewRef = useRef<any>(null);
   
   const location = useLocation();
-  const { steps, basefiles, prompt } = location.state || {};
+  const { steps, prompt } = location.state || {};
   const { setCurrentStep, setTotalSteps } = useLoad();
 
   useEffect(() => {

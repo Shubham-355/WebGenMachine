@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Boxes } from './ui/background-boxes';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { ChevronRight, Hammer, Upload, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Hammer, Upload, X, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useLoad } from '../state/LoadContext';
 
@@ -11,8 +11,58 @@ const Prompting = () => {
     const [prompt, setPrompt] = useState('');
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const { setIsLoaded } = useLoad();
     
+    // Extended list of suggestions
+    const allTags = [
+        "Landing Page", "Portfolio", "E-commerce", "Blog", "Dashboard",
+        "Corporate Website", "Restaurant Menu", "Photography Gallery", 
+        "Music Player", "Social Media App", "News Portal", "Travel Blog",
+        "Fashion Store", "Tech Startup", "Real Estate", "Educational Platform",
+        "Fitness Tracker", "Recipe Blog", "Art Gallery", "Event Planning",
+        "Medical Clinic", "Law Firm", "Gaming Website", "Crypto Exchange",
+        "Streaming Platform", "Job Board", "Wedding Planner", "Pet Care",
+        "Interior Design", "Car Dealership", "Food Delivery", "Banking App",
+        "Weather App", "Calendar App", "Chat Application", "Video Conference"
+    ];
+    
+    // Creative prompts for animation
+    const creativePrompts = [
+        "Create a modern landing page with hero section and contact form",
+        "Build a responsive portfolio with project gallery and animations",
+        "Design a dark-themed dashboard with charts and data tables",
+        "Make a restaurant website with menu cards and booking system",
+        "Build an e-commerce product page with reviews and cart",
+        "Create a blog layout with sidebar and article cards",
+        "Design a music player interface with playlist controls",
+        "Build a social media feed with posts and interactions",
+        "Make a travel booking site with search and filters",
+        "Create a fitness app dashboard with progress tracking",
+        "Design a real estate listing page with property cards",
+        "Build a news portal with article grid and categories",
+        "Make a photography portfolio with lightbox gallery",
+        "Create a corporate website with services and testimonials",
+        "Design a crypto exchange interface with trading charts"
+    ];
+    
+    // Get 5 random tags for display
+    const getRandomTags = () => {
+        const shuffled = [...allTags].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 5);
+    };
+    
+    const [displayTags] = useState(() => getRandomTags());
+    const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+    
+    // Animate through different prompts
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentPromptIndex(prev => (prev + 1) % creativePrompts.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [creativePrompts.length]);
+
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -32,7 +82,9 @@ const Prompting = () => {
     
     const handleCreateClick = async () => {
         if (!prompt.trim() && !selectedImage) return;
+        if (isLoading) return;
 
+        setIsLoading(true);
         try {
             const formData = new FormData();
             formData.append('prompt', prompt.trim());
@@ -55,6 +107,8 @@ const Prompting = () => {
         } catch (error) {
             console.error('Error generating content:', error);
             alert('Failed to generate content. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
     
@@ -156,19 +210,24 @@ const Prompting = () => {
                         </motion.label>
                         
                         <motion.button 
-                            className="px-4 py-4 text-gray-200 bg-black/80 border border-gray-700/80
+                            className={`px-4 py-4 text-gray-200 bg-black/80 border border-gray-700/80
                                     rounded-lg shadow-lg hover:shadow-blue-900/2 
                                     transition-all duration-300 font-medium flex items-center justify-center
-                                    min-w-[52px] aspect-square"
+                                    min-w-[52px] aspect-square ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                             onClick={handleCreateClick}
-                            whileHover={{ 
+                            disabled={isLoading}
+                            whileHover={!isLoading ? { 
                                 scale: 1.05, 
                                 background: "#ffffff",
                                 color: "black"
-                            }}
-                            whileTap={{ scale: 0.98 }}
+                            } : {}}
+                            whileTap={!isLoading ? { scale: 0.98 } : {}}
                         >
-                            <Hammer className="w-5 h-5" />
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <Hammer className="w-5 h-5" />
+                            )}
                         </motion.button>
                     </div>
                     
@@ -178,7 +237,7 @@ const Prompting = () => {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.7, duration: 0.8 }}
                     >
-                        {["Landing Page", "Portfolio", "E-commerce", "Blog", "Dashboard"].map((tag, index) => (
+                        {displayTags.map((tag, index) => (
                             <motion.span 
                                 key={tag}
                                 className="px-3 py-1.5 bg-gradient-to-r from-black/60 to-black/40 text-gray-400 
@@ -207,16 +266,21 @@ const Prompting = () => {
                         <div className="mt-8 w-full">
                             <div className="w-full border-t border-gray-800/40 pt-4">
                                 <motion.div 
-                                    className="flex justify-between items-center text-[10px] text-gray-500 font-['JetBrains_Mono'] tracking-tight"
+                                    className="flex justify-center items-center text-[11px] text-gray-400 font-['Space_Grotesk'] tracking-wide"
                                     initial={{ opacity: 0 }}
-                                    animate={{ opacity: 0.7 }}
+                                    animate={{ opacity: 0.8 }}
                                     transition={{ delay: 1.2, duration: 0.8 }}
                                 >
-                                    <span>AI_POWERED</span>
-                                    <span className="flex items-center gap-1">
-                                        EXPLORE TEMPLATES
-                                        <ChevronRight className="w-3 h-3" />
-                                    </span>
+                                    <motion.span
+                                        key={currentPromptIndex}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="text-center"
+                                    >
+                                        {creativePrompts[currentPromptIndex]}
+                                    </motion.span>
                                 </motion.div>
                             </div>
                         </div>
