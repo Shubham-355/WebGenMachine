@@ -79,6 +79,12 @@ const Prompting = () => {
         setSelectedImage(null);
         setImagePreview(null);
     };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleCreateClick();
+        }
+    };
     
     const handleCreateClick = async () => {
         if (!prompt.trim() && !selectedImage) return;
@@ -171,6 +177,7 @@ const Prompting = () => {
                                 type="text" 
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 className="w-full p-4 text-gray-200 bg-black/60 border border-gray-700/90 rounded-lg
                                         backdrop-blur-lg focus:border-blue-500/50 focus:outline-none focus:ring-1 
                                         focus:ring-blue-500/50 placeholder-gray-500 transition-all duration-300
