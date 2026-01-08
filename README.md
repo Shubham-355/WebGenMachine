@@ -1,14 +1,15 @@
 # WebGenMachine
 
 **WebGenMachine** is a website that generates React websites.  
-The backend is complete, and the video below showcases the current progress of the frontend.
 
 
+https://github.com/user-attachments/assets/4aea3583-74a6-4024-8a64-b1484ce4ece9
 
-https://github.com/user-attachments/assets/333181f6-b7f8-4c99-a0fe-2e84a89556a6
+https://github.com/user-attachments/assets/84c4bf34-e858-41d8-9d5d-754349782d3c
 
+https://github.com/user-attachments/assets/57f6fc38-b09e-47d4-a0e1-f0d8041373c4
 
-
+https://github.com/user-attachments/assets/07a2fc92-f568-47bb-a079-67caa6c0074f
 
 ## 🛠 Getting Started
 ### 1. Clone the Repository
