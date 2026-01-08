@@ -64,7 +64,7 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
 
     // Generate content using the Gemini API
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",

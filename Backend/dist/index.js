@@ -61,7 +61,7 @@ app.post('/api/generate', upload.single('image'), (req, res) => __awaiter(void 0
         parts.push({ text: systemPrompt }, { text: `Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${prompts_js_1.defaultPrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n` }, { text: userprompt });
         // Generate content using the Gemini API
         const response = yield ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             contents: [
                 {
                     role: "user",
