@@ -22,6 +22,10 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY as string });
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Endpoint to generate website based on prompt
 app.post('/api/generate', upload.single('image'), async (req, res) => {
   try {

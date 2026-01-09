@@ -31,6 +31,9 @@ app.use(cors({
 app.use(express_1.default.json());
 const ai = new genai_1.GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const upload = multer({ storage: multer.memoryStorage() });
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 // Endpoint to generate website based on prompt
 app.post('/api/generate', upload.single('image'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
